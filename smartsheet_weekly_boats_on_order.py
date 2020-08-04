@@ -89,7 +89,7 @@ def send_email(recipient, subject, plain_text, html_text, attachment=None):
 
 
 def email_dealership(dealership, email_list, plain_text, html_text, attachment):
-    subject = '%s Boats on Order Report for %s' % (dealership, datetime.date.today().strftime('%B %d, %Y'))
+    subject = 'Automated %s Boats on Order Report for %s' % (dealership, datetime.date.today().strftime('%B %d, %Y'))
     for recipient in email_list[:]:
         status = 'sent' if not debug else 'skipped on debug'
         try:

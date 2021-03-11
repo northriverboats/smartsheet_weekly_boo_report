@@ -1,4 +1,0 @@
-layout python-venv
-export MAIL_FROM='Joe Depweg <joed@northriverboats.com>'
-export MAIL_SERVER=northriverboats-com.mail.protection.outlook.com
-export SHEET_FOLDER="/samba/shares/production/Boats on Order - Smartsheet edition/Formatted - PDF/"

@@ -6,4 +6,4 @@ services:
     volumes:
       - ./:/app
       - ${SHEET_FOLDER}:/input
-    entrypoint: [python, check_for_hulls.py]
+    entrypoint: [python, martsheet_weekly_boats_on_order.py]

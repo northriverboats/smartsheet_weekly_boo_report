@@ -107,7 +107,7 @@ def email_dealerships(dealership):
     plain_text = plain_text_template % (dealership, datetime.date.today().strftime('%B %d, %Y'))
     html_text = html_text_template % (dealership, datetime.date.today().strftime('%B %d, %Y'))
     # find attachement file
-    source = os.getenv('SHEET_FOLDER') + dealership + ' - Boats on Order.pdf'
+    source = '/input/' + dealership + ' - Boats on Order.pdf'
     # print list of dealership employees to email
     if debug or verbose:
         echo('    Send To:    ', nl=False)

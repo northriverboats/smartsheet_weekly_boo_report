@@ -10,8 +10,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from click import echo
-from emailer import *
-
+from emailer.emailer import Email
 
 # load environmental variables
 def resource_path(relative_path):

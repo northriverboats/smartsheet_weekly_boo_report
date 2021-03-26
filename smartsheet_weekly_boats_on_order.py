@@ -13,6 +13,20 @@ from dotenv import load_dotenv
 from emailer.emailer import Email
 
 
+# Setup Logging
+class OneLineExceptionFormatter(logging.Formatter):
+    def formatException(self, exc_info):
+        result = super().formatException(exc_info)
+        return repr(result)
+
+    def format(self, record):
+        result = super().format(record)
+        if record.exc_text:
+            result = result.replace("\n", "")
+        return result
+
+
+
 # load environmental variables
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -76,7 +90,8 @@ def log(text):
 
 # CODE starts here
 def send_email(recipient, subject, plain_text, html_text, attachment=None):
-    if debug: return  # do not send email if debug
+    if debug:
+		return  # do not send email if debug
     m = Email(os.getenv('MAIL_SERVER'))
     m.setFrom(os.getenv('MAIL_FROM'))
     m.addRecipient(recipient)
@@ -85,7 +100,7 @@ def send_email(recipient, subject, plain_text, html_text, attachment=None):
     m.setHtmlBody(html_text)
     if (attachment):
         m.addAttachment(attachment)
-    m.send()
+    # FWW m.send()
 
 
 def email_dealership(dealership, email_list, plain_text, html_text, attachment):
@@ -99,8 +114,7 @@ def email_dealership(dealership, email_list, plain_text, html_text, attachment):
         log('    Emailing:   {:.<36}'.format(recipient) + ' ' + status)
 
 def email_dealerships(dealership):
-    # print dealership name
-    log(dealership)
+    logging.info(dealership)
     # add factory empoloyees to store employees to email
     email_list = users[dealership][:] + users['Factory']
     # generate txt and html versions of message
@@ -108,48 +122,39 @@ def email_dealerships(dealership):
     html_text = html_text_template % (dealership, datetime.date.today().strftime('%B %d, %Y'))
     # find attachement file
     source = '/input/' + dealership + ' - Boats on Order.pdf'
-    # print list of dealership employees to email
-    if debug or verbose:
-        click.echo('    Send To:    ', nl=False)
-        click.echo(users[dealership])
+	logging.info(f'    Send To:    {users[dealership]}')
     # if file cant be found skip 
     if os.path.isfile(source):
-        if debug or verbose:
-            click.echo('    Found:      ' + source)
+        logging.info(f'    Found:      {source}')
     else:
-        log('    Not found:  ' + source)
+        logging.warning(f'    Not found:   {source}')
         return
     try:
         # copy sheet to /tmp - if copy fails then error out on whole store with no attachment
-        attachment = '/tmp/' + dealership + ' - Boats on Order.pdf'
+        attachment = os.path.join('/tmp/', f'{dealership} - Boats on Order.pdf')
         shutil.copy(source, attachment)
-        if debug or verbose:
-            click.echo('    Copying:    ' + attachment)
+        logging.info(f'    Copying:     {attachment}')
         email_dealership(dealership, email_list, plain_text, html_text, attachment)
-        if debug or verbose:
-            click.echo('    Deleting:   ' + attachment)
+        logging.info(f'    Deleting:    {attachment}')
         os.remove(attachment)
     except IOError:
-        log("    Can't copy: " + source)
+        logging.error('Can\'t copy:  {source}')
     except Exception as e:
-        log('    Error:      '+ str(e))
+        logging.error(str(e))
 
 def process_boo(dealers):
-    if debug or verbose:
-        click.echo('Processing Dealerships')
+    logging.info('Processing Dealerships')
     for dealer in dealers:
         try:
             email_dealerships(dealer)
         except Exception as e:
-            log('    Error: ' + str(e))
+            logging.error(str(e))
     # Send status report
     for recepient in os.getenv('STATUS_REPORT').split('|'):
+        logging.info(f"{('Sending', 'Not Sending')[debug]} Status Report to: {recepient}")
         if debug:
-            click.echo('Not sending Status Report to: ' + recepient)
             continue
-        if verbose:
-            click.echo('Sending Status Report to: ' + recepient)
-        send_email(recepient, 'Smartsheet Weekly Boats On Order Report Status', log_text, '<pre>\n' + log_text + '</pre>\n')
+        send_email(recepient, 'Smartsheet Weekly Boats On Order Report Status', log_text, f"<pre>\n{log_text}</pre>\n")
 
 
 @click.command()
@@ -159,6 +164,8 @@ def process_boo(dealers):
 @click.option('--list', '-l', is_flag=True, help='list all dealers')
 @click.option('--verbose', '-v', is_flag=True, help='show more details')
 def cli(debug, exclude, include, list, verbose):
+	logging.info('we make it to this point')
+	"""
     set_debug(debug)
     set_verbose(verbose)
     dealers = all_dealers[:]
@@ -170,6 +177,20 @@ def cli(debug, exclude, include, list, verbose):
             click.echo(dealer)
         return
     process_boo(dealers)
+	"""
+
+# Start Logging
+handler = logging.StreamHandler()
+formatter = OneLineExceptionFormatter(logging.BASIC_FORMAT)
+handler.setFormatter(formatter)
+root = logging.getLogger()
+root.setLevel(os.environ.get("LOGLEVEL", "INFO"))
+root.addHandler(handler)
 
 if __name__ == '__main__':
-    cli()
+    try:
+        exit(cli())
+    except Exception:
+        logging.exception("Exception in cli()/main(): ")
+        exit(1)
+

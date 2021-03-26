@@ -2,15 +2,16 @@
 
 # email PDF version of the Boats on order report to each dealer
 
-import click
 import datetime
-import time
-import shutil
+import logging
 import os
+import shutil
 import sys
+import time
+import click
 from dotenv import load_dotenv
-from click import echo
 from emailer.emailer import Email
+
 
 # load environmental variables
 def resource_path(relative_path):
@@ -69,7 +70,7 @@ def set_verbose(flag):
 def log(text):
     global log_text
     if debug or verbose:
-        echo(text)
+        click.echo(text)
     log_text += text + "\n"
 
 
@@ -109,12 +110,12 @@ def email_dealerships(dealership):
     source = '/input/' + dealership + ' - Boats on Order.pdf'
     # print list of dealership employees to email
     if debug or verbose:
-        echo('    Send To:    ', nl=False)
-        echo(users[dealership])
+        click.echo('    Send To:    ', nl=False)
+        click.echo(users[dealership])
     # if file cant be found skip 
     if os.path.isfile(source):
         if debug or verbose:
-            echo('    Found:      ' + source)
+            click.echo('    Found:      ' + source)
     else:
         log('    Not found:  ' + source)
         return
@@ -123,10 +124,10 @@ def email_dealerships(dealership):
         attachment = '/tmp/' + dealership + ' - Boats on Order.pdf'
         shutil.copy(source, attachment)
         if debug or verbose:
-            echo('    Copying:    ' + attachment)
+            click.echo('    Copying:    ' + attachment)
         email_dealership(dealership, email_list, plain_text, html_text, attachment)
         if debug or verbose:
-            echo('    Deleting:   ' + attachment)
+            click.echo('    Deleting:   ' + attachment)
         os.remove(attachment)
     except IOError:
         log("    Can't copy: " + source)
@@ -135,7 +136,7 @@ def email_dealerships(dealership):
 
 def process_boo(dealers):
     if debug or verbose:
-        echo('Processing Dealerships')
+        click.echo('Processing Dealerships')
     for dealer in dealers:
         try:
             email_dealerships(dealer)
@@ -144,10 +145,10 @@ def process_boo(dealers):
     # Send status report
     for recepient in os.getenv('STATUS_REPORT').split('|'):
         if debug:
-            echo('Not sending Status Report to: ' + recepient)
+            click.echo('Not sending Status Report to: ' + recepient)
             continue
         if verbose:
-            echo('Sending Status Report to: ' + recepient)
+            click.echo('Sending Status Report to: ' + recepient)
         send_email(recepient, 'Smartsheet Weekly Boats On Order Report Status', log_text, '<pre>\n' + log_text + '</pre>\n')
 
 
@@ -166,7 +167,7 @@ def cli(debug, exclude, include, list, verbose):
     dealers = [dealer for dealer in dealers  if dealer not in exclude]
     if (list):
         for dealer in dealers:
-            echo(dealer)
+            click.echo(dealer)
         return
     process_boo(dealers)
 

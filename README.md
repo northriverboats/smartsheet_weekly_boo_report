@@ -42,4 +42,11 @@ Options:
   -v, --verbose       show more details
   --help              Show this message and exit.
 ```
+# Installation
+```
+pip install -r requirements.txt
+pip install git+https://github.com/northriverboats/emailer.git
+# remove emailer=1.0.0
+# from pip freeze > reqirements.txt
+```
 

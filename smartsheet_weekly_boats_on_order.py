@@ -28,7 +28,9 @@ load_dotenv(dotenv_path=env_path)
 
 # GLOBALS start here
 all_dealers = os.getenv('DEALERS').split('|')
-users = {key: os.getenv(key.upper().replace(' ', '_')).split('|') for key in all_dealers[:]+['Factory']}
+users = {key: os.getenv(
+              key.upper().replace(' ', '_').replace('.','')).split('|')
+         for key in all_dealers+['Factory']}
 debug = False
 verbose = False
 log_text = ""
@@ -107,7 +109,7 @@ def email_dealerships(dealership):
     plain_text = plain_text_template % (dealership, datetime.date.today().strftime('%B %d, %Y'))
     html_text = html_text_template % (dealership, datetime.date.today().strftime('%B %d, %Y'))
     # find attachement file
-    source = '/input/' + dealership + ' - Boats on Order.pdf'
+    source = os.getenv('SHEET_FOLDER') + dealership.replace('.', '') + ' - Boats on Order.pdf'
     # print list of dealership employees to email
     if debug or verbose:
         click.echo('    Send To:    ', nl=False)
@@ -121,7 +123,7 @@ def email_dealerships(dealership):
         return
     try:
         # copy sheet to /tmp - if copy fails then error out on whole store with no attachment
-        attachment = '/tmp/' + dealership + ' - Boats on Order.pdf'
+        attachment = '/tmp/' + dealership.replace('.', '') + ' - Boats on Order.pdf'
         shutil.copy(source, attachment)
         if debug or verbose:
             click.echo('    Copying:    ' + attachment)

@@ -79,6 +79,7 @@ def log(text):
 # CODE starts here
 def send_email(recipient, subject, plain_text, html_text, attachment=None):
     if debug: return  # do not send email if debug
+    if not recipient: return  # do not send if no adressee
     m = Email(os.getenv('MAIL_SERVER'))
     m.setFrom(os.getenv('MAIL_FROM'))
     m.addRecipient(recipient)

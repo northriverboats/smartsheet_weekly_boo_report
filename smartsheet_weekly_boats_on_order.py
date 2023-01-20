@@ -10,7 +10,7 @@ import sys
 import time
 import click
 from dotenv import load_dotenv
-from emailer.emailer import Email
+from emailer import mail_results
 
 
 # Setup Logging
@@ -94,15 +94,8 @@ def log(text):
 def send_email(recipient, subject, plain_text, html_text, attachment=None):
     if debug: return  # do not send email if debug
     if not recipient: return  # do not send if no adressee
-    m = Email(os.getenv('MAIL_SERVER'))
-    m.setFrom(os.getenv('MAIL_FROM'))
-    m.addRecipient(recipient)
-    m.setSubject(subject)
-    m.setTextBody(plain_text)
-    m.setHtmlBody(html_text)
-    if (attachment):
-        m.addAttachment(attachment)
-    # FWW m.send()
+    mail_results(subject, html_text, text=plain_text,
+                 recipient=recipient,attachment=attachment)
 
 
 def email_dealership(dealership, email_list, plain_text, html_text, attachment):

@@ -162,8 +162,6 @@ def process_boo(dealers):
 @click.option('--list', '-l', is_flag=True, help='list all dealers')
 @click.option('--verbose', '-v', is_flag=True, help='show more details')
 def cli(debug, exclude, include, list, verbose):
-	logging.info('we make it to this point')
-	"""
     set_debug(debug)
     set_verbose(verbose)
     dealers = all_dealers[:]
@@ -175,7 +173,6 @@ def cli(debug, exclude, include, list, verbose):
             click.echo(dealer)
         return
     process_boo(dealers)
-	"""
 
 # Start Logging
 handler = logging.StreamHandler()
